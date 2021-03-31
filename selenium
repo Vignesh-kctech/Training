@@ -1,0 +1,203 @@
+package com.Demo.pages;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
+import com.Demo.Selenium.base.SeleniumBase;
+import com.Demo.utils.DriverInitialize;
+import com.relevantcodes.extentreports.ExtentTest;
+import com.relevantcodes.extentreports.LogStatus;
+
+//Constructor
+public class GmailLogin extends SeleniumBase {
+	public GmailLogin(RemoteWebDriver driver, ExtentTest test) {
+		super(driver, test);
+		// TODO Auto-generated constructor stub
+	}
+
+	DriverInitialize DriverInitialize = new DriverInitialize();
+	protected RemoteWebDriver currentdriver;
+	protected ExtentTest test;
+	
+	// Element list
+
+	String mainframe = "mainFrame";
+	String Enterusername = "//input[@id='txtUsername']";
+	String EnterPassword = "//input[@id='txtPassword']";
+	String LoginButton = "//input[@id='btnLogin']";
+	String url = "https://s2.demo.opensourcecms.com/orangehrm/symfony/web/index.php/auth/login";
+	String Firstname,Lastname;
+	
+
+	public GmailLogin NavigateURL(String Url) {
+		try {
+		currentdriver.navigate().to(Url);
+	    ReportLog("info", "Successfully navigated to the Ornage HRM page"+Url+"</b></font>");
+		Thread.sleep(5000);
+		}
+		catch(Exception e) {
+		ReportLog("error", "website  is Down");
+		DriverInitialize.extent.flush();
+		System.exit(1);
+		}
+		return this;	
+	}
+	
+	public GmailLogin WindowNavigate() {
+		try {
+		Set<String> windowHandles = driver.getWindowHandles();
+	    List<String> windowStrings = new ArrayList<>(windowHandles);
+	    String reqWindow = windowStrings.get(1);
+	    currentdriver.switchTo().window(reqWindow);	
+	    Thread.sleep(2000);
+	    ReportLog("info", "Navigated to New window with title of:"+currentdriver.getTitle());
+	    return this;
+		}
+		catch(Exception e) {
+		ReportLog("fail", "Unable to Navigate New Window");
+		DriverInitialize.extent.flush();
+		System.exit(1);
+		return null;
+		}}
+		
+		public GmailLogin enterUsername(String username) throws InterruptedException {
+			try {
+			//click("//input")
+			Clear(findelement("name", "EnteruserName"));
+			SendKeys(findelement("name", "opensourcecms"),username);
+			ReportLog("info", "Username Entered In the Username Input Field:<font color='blue'><b>"+username+"</b></font>");
+			return this;
+			}
+			catch(Exception e) {
+			ReportLog("fail", "Unable to enter username");
+			return null;
+			}
+			
+		}
+		public GmailLogin enterPassword(String password) throws InterruptedException {
+			try {
+			Clear(findelement("name", "EnterPassword"));
+			SendKeys(findelement("name", "opensourcecms"),password);
+			ReportLog("info", "Password Entered In the Password Input Field");
+			return this;
+			}
+			catch(Exception e) {
+			ReportLog("fail", "Unable to enter password");
+			return null;
+			}
+			
+		}
+		public GmailLogin clickloginbutton() throws InterruptedException {
+			try {
+			Click(findelement("id", "LoginButton"));
+			Click(findelement("xpath", "//input[@id='btnLogin']"));
+			Thread.sleep(5000);
+			return this;
+			}
+			catch(Exception e) {
+			ReportLog("fail", "Unable to click login button");
+			return null;
+			}
+			
+		}
+		public GmailLogin MainWindowNavigation() {
+			try {
+			String winHandleBefore = driver.getWindowHandle();
+		    currentdriver.switchTo().window(winHandleBefore);
+		    Thread.sleep(3000);
+		    ReportLog("info", "Navigated to New window with title of:"+currentdriver.getTitle());
+			return this;
+			
+			}catch (Exception e) {
+			ReportLog("fail", "Window navigation failed !!!");
+			return null;
+			}
+		}
+		public GmailLogin MainFrameNavigation() {
+			try {
+			// frame navigation
+			WebElement ele = findelement("name", mainframe);
+		    currentdriver.switchTo().frame(ele);
+		    Thread.sleep(3000);
+		    return this;
+			}
+			catch(Exception e) {
+				ReportLog("fail", "Frame navigation failed !!!");
+				return null;	
+			}
+	
+	
+
+	
+	}
+}
+
+
+
+
+TEST FIle: 
+
+
+package com.Demo.pages;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.testng.annotations.Test;
+
+import com.Demo.pages.GmailLogin;
+import com.Demo.utils.DriverInitialize;
+
+
+public class GmailTest extends DriverInitialize{
+	DriverInitialize DriverInitialize =  new DriverInitialize();
+	Map<String, String> EnvironmentValuesDatas = new LinkedHashMap<String, String>();
+	Map<String,JSONArray> Mapvalues = new LinkedHashMap<String,JSONArray>();
+	String Url,Username,Password;
+	//tc001
+	@Test(groups = { "Regression"} , dataProvider="fetchData",alwaysRun=true)
+	public void OrangeHRM(Map<String,String> map) throws Exception {
+		GmailLogin lp = new GmailLogin(driver, test);
+		
+		EnvironmentValuesDatas = DriverInitialize.ReadCurrentQueryData();
+		
+		DriverInitialize.setQueryName(EnvironmentValuesDatas.get("SelectQueryName_Login"));
+		Mapvalues = DriverInitialize.ReadCurrentTestData();
+		
+		for (Entry<String, JSONArray> entry : Mapvalues.entrySet()) {
+		 for(Object o:entry.getValue()) {
+			Username =((JSONObject) o).get("Username").toString();   
+			Password =((JSONObject) o).get("Password").toString(); 
+
+			}
+		}
+		
+			try {
+			lp.NavigateURL(Url)
+			.enterUsername(Username)
+			.enterPassword(Password)
+			.clickloginbutton()
+			.MainWindowNavigation()
+			.MainFrameNavigation();
+		}
+		catch (Exception e ) {
+			return;
+		}
+	}
+
+}
+
